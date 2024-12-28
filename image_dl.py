@@ -6,6 +6,7 @@ import requests
 from logger import Logger
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
+from DrissionPage import ChromiumPage
 
 from uri import URI
 
@@ -28,6 +29,11 @@ class ImageDownloader(object):
     with open(json_path, mode="r", encoding="utf-8") as f:
       self.selector_json = json.load(f)
   
+  def _get_domain_from_webarchive(self, uri):
+    for uri_elem in uri.url_structure:
+      if "himebon" in uri_elem:
+        return uri_elem
+  
   def download(self):
     self.logger.info(f"The URL :{self.urls}")
     
@@ -38,16 +44,28 @@ class ImageDownloader(object):
       print("\n================================")
       self.logger.info(f"url_structure:{uri.url_structure}\nprotocol     :{uri.protocol}\ndomain       :{uri.domain}\ndirectories  :{uri.directories}\nfile         :{uri.file}\n")
     
-      res = self._request(uri.url)
+      html = ""
+      if uri.domain == "jsiro.to":
+        page = ChromiumPage()
+        page.get(uri.url)
+        time.sleep(2) # 認証画面をgetしてしまうので2秒スリープ
+        html = page.html
+        page.quit()
+      else:
+        res = self._request(uri.url)
+        if res.status_code != 200 and res.status_code != 201:
+          self.logger.error(f"Cannot connect -> status code:{res.status_code}")
+          continue
+        html = res.text
       
-      if res.status_code != 200 and res.status_code != 201:
-        self.logger.error(f"Cannot connect -> status code:{res.status_code}")
-        continue
+      body = self._parse_html(html)
       
-      body = self._parse_html(res.text)
+      true_domain = uri.domain
+      if uri.domain == "web.archive.org":
+        true_domain = self._get_domain_from_webarchive(uri)
       
       i = 0
-      json_obj = self.selector_json[uri.domain]
+      json_obj = self.selector_json[true_domain]
       selectors: list[str] = json_obj["selectors"]
       offset: int = json_obj["offset"]
       isNecessaryFileNumber: bool = json_obj["isNecessaryFileNumber"]
@@ -69,6 +87,7 @@ class ImageDownloader(object):
         self.logger.info(f"Created a directory {save_directory}")
       
       selector_number = 0
+      try_again = True
       while(True):
         time.sleep(0.1)
         self.logger.info(f"i={i}")
@@ -78,11 +97,16 @@ class ImageDownloader(object):
         img = body.select(selector)
         
         if img == []:
+          if try_again:
+            try_again = False
+            i += 1
+            self.logger.warn("img is not exist. Try again same selector")
+            continue
           if selector_number+1 >= len(selectors):
             self.logger.error("img is not exist.")
             break
           selector_number += 1
-          self.logger.warn("imt is not exist. Try another selector.")
+          self.logger.warn("img is not exist. Try another selector.")
           continue
         
         for attr in img[0].__dict__["attrs"]:
@@ -103,6 +127,8 @@ class ImageDownloader(object):
         with open(file, mode="wb") as f:
           img_res = self._request(src)
           f.write(img_res.content)
+          
+        try_again = True
         
   def _check_urls(self, urls: list[URI]):
     if urls == []:
