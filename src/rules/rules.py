@@ -19,6 +19,7 @@ from rules.erodoujinshi_world_com_rule import ErodoujinshiWorldComRule
 from rules.com_hokan_site_rule import ComHokanSiteRule
 from rules.oreno_erohon_com_rule import OrenoErohonComRule
 from rules.hentai_books_com_rule import HentaiBooksComRule
+from rules.web_archive_org_rule import WebArchiveOrgRule
 
 RULES: list[Rule] = [
     EromangaLifeComRule(),
@@ -41,4 +42,5 @@ RULES: list[Rule] = [
     ComHokanSiteRule(),
     OrenoErohonComRule(),
     HentaiBooksComRule(),
+    WebArchiveOrgRule(),
 ]
