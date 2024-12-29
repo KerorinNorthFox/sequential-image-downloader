@@ -8,10 +8,19 @@ from logger import logger
 基本的な処理が実装されたルール
 """
 class BasicRule(Rule):
-    def __init__(self, domain:str, selectors:list[str], start_nth_child_index:int):
+    """
+    _domain                : str       -> ルールのドメイン名
+    _selectors             : list[str] -> 先頭のimgタグのセレクター
+    _start_nth_child_index : int       -> imgタグの開始位置 (nth-child(xxxx))
+    _step                  : int       -> nth-childの増え方
+    _try_again_limit       : int       -> imgタグが見つからなかった時何回やり直すか
+    """
+    def __init__(self, domain:str, selectors:list[str], start_nth_child_index:int, step:int=1, try_again_limit:int=2):
         self._domain = domain
         self._selectors = selectors
         self._start_nth_child_index = start_nth_child_index
+        self._step = step
+        self._try_again_limit = try_again_limit
     
     def __call__(self) -> str:
         return self._domain
@@ -33,13 +42,13 @@ class BasicRule(Rule):
         
         i = 0
         selector_number = 0
-        try_again_limit = 2
+        try_again_limit = self._try_again_limit
         while(True):
             selectors: str = self.get_complete_selectors(i, uri)
             img = body.select(selectors[selector_number])
             
             if img == []:
-                if try_again_limit <= 0:
+                if try_again_limit > 0:
                     logger.warn(f"img is not exist. Try again same selector. (try count :{try_again_limit})")
                     try_again_limit -= 1
                     i += 1
@@ -57,7 +66,8 @@ class BasicRule(Rule):
                 continue
             logger.info(f"src :{src}")
             image_urls.append(src)
-            i += 1
+            i += self._step
+            try_again_limit = self._try_again_limit
         
         return image_urls
     
@@ -80,7 +90,7 @@ class BasicRule(Rule):
         return body
         
     def get_complete_selectors(self, i:int, uri) -> list[str]:
-        return [selector.replace("xxxx", str(i+self._start_nth_child_index)) for selector in self._selectors]
+        return [selector.replace("xxxx", str(i+self.start_nth_child_index)) for selector in self.selectors]
     
     def get_image_src(self, img):
         for attr in img[0].__dict__["attrs"]:

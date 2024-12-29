@@ -11,6 +11,7 @@ def main():
 
     for uri in uris:
         p.download(uri, save_dir)
+        # TODO: ダウンロード終了したらurls.txtから完了したurlを削除する処理
 
 if __name__ == '__main__':
     main()
