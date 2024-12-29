@@ -5,23 +5,26 @@ from logger import logger
 import os
 
 """
-テキストファイルからuriを読み込む
+テキストファイルからurlを読み込む
 """
-def load_uris(url_txt_path:str) -> list[Uri]:
+def load_urls(url_txt_path:str) -> list[str]:
     with open(url_txt_path, mode="r", encoding="utf-8") as f:
         urls: list[str] = f.readlines()
-        return [Uri(url) for url in urls]
+        return urls
 
 class ImageDownloader(object):
     def download(self, uri:Uri, save_dir:str):
         logger.info(f"The Url :{uri()}")
         
-        if self._check_uri(uri): quit(1)
+        if self._check_uri(uri):
+            raise Exception("The uri is wrong.")
         
         print("\n================================")
         logger.info(f"\nurl_structure:{uri.url_structure}\nprotocol     :{uri.protocol}\ndomain       :{uri.domain}\ndirectories  :{uri.directories}\nfile         :{uri.file}\n")
         
-        rule: Rule = self._get_selector_rule(uri.domain)
+        rule = self._get_selector_rule(uri.domain)
+        if rule is None:
+            raise Exception("Rule does not exist.")
         image_urls: list[str] = rule.collect_image_urls(uri)
         
         complete_save_dir = self._combine_save_dir(save_dir, uri)
@@ -41,7 +44,7 @@ class ImageDownloader(object):
     uriをチェックする
     1.uriにhttpが含まれているか
     """
-    def _check_uri(self, uri: Uri):
+    def _check_uri(self, uri: Uri) -> bool:
         if not "http" in uri.protocol:
             logger.error("Given uri is not url")
             return True
