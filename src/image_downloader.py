@@ -4,9 +4,6 @@ from uri import Uri
 from logger import logger
 import os
 
-"""
-テキストファイルからurlを読み込む
-"""
 def load_urls(url_txt_path:str) -> list[str]:
     with open(url_txt_path, mode="r", encoding="utf-8") as f:
         urls: list[str] = f.readlines()
@@ -59,25 +56,25 @@ class ImageDownloader(object):
                 return rule
     
     def _combine_save_dir(self, save_path, uri) -> str:
-        space_directories_path = ""
+        dirs = ""
         if uri.directories != []: # urlの間のディレクトリをパスにする
             for directory in uri.directories:
-                space_directories_path += "/" + directory
+                dirs += "/" + directory
                 
-        save_directory_leaf = f"{uri.domain}{space_directories_path}/{uri.file if len(uri.file) < 30 else uri.file[0:29] }"
+        dirs = f"{uri.domain}{dirs}/{uri.file if len(uri.file) < 30 else uri.file[0:29] }"
         
         dir_ban_words = ["?", "？", ":"]
         for dir_ban_word in dir_ban_words:
-            save_directory_leaf = save_directory_leaf.replace(dir_ban_word, "")
+            dirs = dirs.replace(dir_ban_word, "")
             
-        save_directory = os.path.join(save_path, save_directory_leaf)
+        save_dir_path = os.path.join(save_path, dirs)
             
-        logger.info(f"save directory :{save_directory}")
+        logger.info(f"save directory :{save_dir_path}")
         
-        if not os.path.isdir(save_directory):
-            logger.info(f"Try to create a directory : {save_directory}")
-            os.makedirs(save_directory)
-            logger.info(f"Created a directory {save_directory}")
+        if not os.path.isdir(save_dir_path):
+            logger.info(f"Try to create a directory : {save_dir_path}")
+            os.makedirs(save_dir_path)
+            logger.info(f"Created a directory {save_dir_path}")
             
-        return save_directory
+        return save_dir_path
             
