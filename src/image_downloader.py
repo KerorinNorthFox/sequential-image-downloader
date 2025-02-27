@@ -1,8 +1,10 @@
+import urllib.parse
 from rules.rules import RULES
 from rules.rule import Rule
 from uri import Uri
 from logger import logger
 import os
+import urllib
 
 def load_urls(url_txt_path:str) -> list[str]:
     with open(url_txt_path, mode="r", encoding="utf-8") as f:
@@ -61,13 +63,14 @@ class ImageDownloader(object):
             for directory in uri.directories:
                 dirs += "/" + directory
                 
-        dirs = f"{uri.domain}{dirs}/{uri.file if len(uri.file) < 30 else uri.file[0:29] }"
+        dirs = f"{uri.domain}{dirs}/{uri.file}"
         
         dir_ban_words = ["?", "？", ":"]
         for dir_ban_word in dir_ban_words:
             dirs = dirs.replace(dir_ban_word, "")
             
         save_dir_path = os.path.join(save_path, dirs)
+        save_dir_path = self._unquote_save_dir(save_dir_path)
             
         logger.info(f"save directory :{save_dir_path}")
         
@@ -77,4 +80,7 @@ class ImageDownloader(object):
             logger.info(f"Created a directory {save_dir_path}")
             
         return save_dir_path
-            
+    
+    def _unquote_save_dir(self, save_dir_path):
+        dir_path = urllib.parse.unquote(save_dir_path)
+        return dir_path
