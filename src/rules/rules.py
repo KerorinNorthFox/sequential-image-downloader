@@ -20,6 +20,8 @@ from rules.com_hokan_site_rule import ComHokanSiteRule
 from rules.oreno_erohon_com_rule import OrenoErohonComRule
 from rules.hentai_books_com_rule import HentaiBooksComRule
 from rules.web_archive_org_rule import WebArchiveOrgRule
+from rules.book18_fans_rule import Book18FansRule
+from rules.www_sexloveero_net_rule import WWWSexloveeroNetRule
 
 RULES: list[Rule] = [
     EromangaLifeComRule(),
@@ -43,4 +45,6 @@ RULES: list[Rule] = [
     OrenoErohonComRule(),
     HentaiBooksComRule(),
     WebArchiveOrgRule(),
+    Book18FansRule(),
+    WWWSexloveeroNetRule(),
 ]
