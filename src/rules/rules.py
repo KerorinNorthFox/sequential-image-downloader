@@ -22,6 +22,7 @@ from rules.hentai_books_com_rule import HentaiBooksComRule
 from rules.web_archive_org_rule import WebArchiveOrgRule
 from rules.book18_fans_rule import Book18FansRule
 from rules.www_sexloveero_net_rule import WWWSexloveeroNetRule
+from rules.javdeep_net_rule import JavDeepNetRule
 
 RULES: list[Rule] = [
     EromangaLifeComRule(),
@@ -47,4 +48,5 @@ RULES: list[Rule] = [
     WebArchiveOrgRule(),
     Book18FansRule(),
     WWWSexloveeroNetRule(),
+    JavDeepNetRule(),
 ]
