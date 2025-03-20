@@ -1,9 +1,6 @@
-from uri import Uri
-from rules.basic_rule import BasicRule
-from DrissionPage import ChromiumPage
-import time
+from rules.cloudflare_rule import CloudflareRule
 
-class JavDeepNetRule(BasicRule):
+class JavDeepNetRule(CloudflareRule):
     def __init__(self) -> None:
 
         super().__init__(
@@ -13,11 +10,3 @@ class JavDeepNetRule(BasicRule):
             ],
             start_nth_child_index = 2
         )
-        
-    def getHtml(self, uri: Uri) -> str:
-        page = ChromiumPage()
-        page.get(uri.url)
-        time.sleep(2.5) # 認証画面をgetしてしまうので2.5秒スリープ
-        html = page.html
-        page.quit()
-        return html
